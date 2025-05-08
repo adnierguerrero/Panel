@@ -1,0 +1,92 @@
+<header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 justify-between">
+  <!-- Left side: Toggle button and Page title -->
+  <div class="flex items-center">
+    <!-- Sidebar toggle button -->
+    <button 
+      type="button"
+      class="mr-4 p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:outline-none transition-colors duration-200"
+      (click)="toggleSidebar()"
+      aria-label="Toggle sidebar"
+    >
+      <svg 
+        *ngIf="!isSidebarOpen || !isSidebarPinned"
+        xmlns="http://www.w3.org/2000/svg" 
+        width="20" 
+        height="20" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+      >
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <svg 
+        *ngIf="isSidebarOpen && isSidebarPinned"
+        xmlns="http://www.w3.org/2000/svg" 
+        width="20" 
+        height="20" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+      >
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+    
+    <!-- Page title -->
+    <h1 class="text-xl font-semibold text-gray-800 dark:text-white">
+      {{ currentPageTitle }}
+    </h1>
+  </div>
+  
+  <!-- Right side: Search, notifications and profile -->
+  <div class="flex items-center space-x-4">
+    <!-- Search component -->
+    <app-search-header
+      (onSearch)="handleSearch($event)"
+    ></app-search-header>
+    
+    <!-- Notifications button -->
+    <button 
+      type="button"
+      class="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:outline-none transition-colors duration-200 relative"
+      aria-label="Notifications"
+    >
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="20" 
+        height="20" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+      >
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+      </svg>
+      <!-- Notification badge -->
+      <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+    </button>
+    
+    <!-- User profile button -->
+    <button 
+      type="button"
+      class="flex items-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none transition-colors duration-200"
+      aria-label="User profile"
+    >
+      <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-medium">
+        JS
+      </div>
+    </button>
+  </div>
+</header>

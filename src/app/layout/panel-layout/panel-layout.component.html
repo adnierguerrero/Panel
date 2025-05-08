@@ -1,0 +1,43 @@
+<div class="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isSidebarPinned]="isSidebarPinned"
+    (onToggleSidebar)="toggleSidebar()"
+    (onSearch)="handleSearch($event)"
+  ></app-header>
+  
+  <div class="flex flex-1 h-[calc(100vh-4rem)] overflow-hidden">
+    <!-- Sidebar -->
+    <app-sidebar
+      [features]="features"
+      [defaultHomePage]="defaultHomePage"
+      [currentPage]="currentPage"
+      [openSubmenus]="openSubmenus"
+      [isSidebarOpen]="isSidebarOpen"
+      [isFavoritesOpen]="isFavoritesOpen"
+      [activeCollapsedPanel]="activeCollapsedPanel"
+      [isSidebarPinned]="isSidebarPinned"
+      [favoriteItems]="favoriteItems"
+      [canClearFavorites]="canClearFavorites"
+      (onNavigate)="handleNavigate($event)"
+      (toggleSubmenu)="toggleSubmenu($event)"
+      (onAddItem)="handleAddItem($event)"
+      (onToggleFavorite)="handleToggleFavorite($event)"
+      (toggleFavoritesCollapse)="toggleFavoritesCollapse()"
+      (onToggleSidebar)="toggleSidebar()"
+      (onSetDefaultHomePage)="handleSetDefaultHomePage($event)"
+      (onToggleActiveCollapsedPanel)="toggleActiveCollapsedPanel($event)"
+      (onToggleSidebarPin)="toggleSidebarPin()"
+      (onUnfavoriteAll)="handleUnfavoriteAll()"
+    ></app-sidebar>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto p-6">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+  
+  <!-- Message Box Component for notifications -->
+  <app-message-box></app-message-box>
+</div>

@@ -1,0 +1,51 @@
+<aside 
+  #sidebarContainer
+  class="h-full flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden"
+  [class.w-24]="!isSidebarOpen"
+  [class.w-72]="isSidebarOpen"
+>
+  <!-- Sidebar Header -->
+  <app-sidebar-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isSidebarPinned]="isSidebarPinned"
+    [defaultHomePage]="defaultHomePage"
+    (onNavigate)="handleNavigate($event)"
+    (onToggleSidebarPin)="onToggleSidebarPin.emit()"
+    (onToggleSidebar)="onToggleSidebar.emit()"
+  ></app-sidebar-header>
+
+  <!-- Favorites Section -->
+  <app-sidebar-favorites
+    [isSidebarOpen]="isSidebarOpen"
+    [favoriteItems]="favoriteItems"
+    [isFavoritesOpen]="isFavoritesOpen"
+    [canClearFavorites]="canClearFavorites"
+    [defaultHomePage]="defaultHomePage"
+    [currentPage]="currentPage"
+    [activeCollapsedPanel]="activeCollapsedPanel"
+    (toggleFavoritesCollapse)="toggleFavoritesCollapse.emit()"
+    (onUnfavoriteAll)="onUnfavoriteAll.emit()"
+    (onNavigate)="handleNavigate($event)"
+    (onToggleFavorite)="handleToggleFavorite($event)"
+    (onToggleActiveCollapsedPanel)="handleToggleActiveCollapsedPanel($event)"
+  ></app-sidebar-favorites>
+
+  <!-- Main Navigation -->
+  <nav class="flex-1 overflow-y-auto py-2">
+    <app-sidebar-nav-item
+      *ngFor="let feature of features"
+      [feature]="feature"
+      [currentPage]="currentPage"
+      [defaultHomePage]="defaultHomePage"
+      [isSidebarOpen]="isSidebarOpen"
+      [isSubmenuOpen]="isSubmenuOpen(feature.id)"
+      [activeCollapsedPanel]="activeCollapsedPanel"
+      (onNavigate)="handleNavigate($event)"
+      (toggleSubmenu)="handleToggleSubmenu($event)"
+      (onAddItem)="handleAddItem($event)"
+      (onToggleFavorite)="handleToggleFavorite($event)"
+      (onSetDefaultHomePage)="handleSetDefaultHomePage($event)"
+      (onToggleActiveCollapsedPanel)="handleToggleActiveCollapsedPanel($event)"
+    ></app-sidebar-nav-item>
+  </nav>
+</aside>
