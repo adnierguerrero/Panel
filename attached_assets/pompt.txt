@@ -1,0 +1,162 @@
+**Objetivo Principal:**
+Desarrollar una aplicación de panel de control (dashboard) en Angular (versión 17 o la más reciente estable) que replique la funcionalidad y la apariencia del tema de React proporcionado. La aplicación utilizará Tailwind CSS para el estilizado y los iconos de Lucide (o una alternativa Angular compatible como SVGs directos de Lucide).
+
+**Estructura del Proyecto (Sugerida para Angular CLI):**
+
+* `src/app/`
+    * `core/`
+        * `guards/` (Ej: `auth.guard.ts` para rutas protegidas)
+        * `interceptors/`
+        * `services/`
+            * `real-estate.service.ts` (Para obtener datos de las funcionalidades/navegación, similar al `realEstateService` de React)
+            * `layout.service.ts` (Para manejar el estado del layout: sidebar abierto/cerrado/fijado, panel colapsado activo, etc.)
+            * `local-storage.service.ts` (Para persistir preferencias del usuario como página de inicio y estado de fijación del sidebar)
+            * `navigation.service.ts` (Opcional, para centralizar lógica de navegación si es compleja, o usar el Router directamente)
+            * `alert.service.ts` (Para manejar notificaciones/mensajes, en lugar de `window.alert`)
+        * `models/` (Interfaces TypeScript para los datos, ej: `feature.model.ts`)
+    * `layout/` (Componentes principales de la estructura visual)
+        * `header/`
+            * `header.component.ts/.html/.scss`
+            * `search-header/` (Componente de búsqueda dentro del header)
+                * `search-header.component.ts/.html/.scss`
+        * `sidebar/`
+            * `sidebar.component.ts/.html/.scss`
+            * `sidebar-header/`
+                * `sidebar-header.component.ts/.html/.scss`
+            * `sidebar-favorites/`
+                * `sidebar-favorites.component.ts/.html/.scss`
+            * `sidebar-nav-item/`
+                * `sidebar-nav-item.component.ts/.html/.scss`
+            * `sidebar-subnav-item/`
+                * `sidebar-subnav-item.component.ts/.html/.scss`
+        * `panel-layout/` (Componente que orquesta el header, sidebar y el `<router-outlet>`)
+            * `panel-layout.component.ts/.html/.scss`
+    * `features/` (Módulos para cada sección principal, con sus propios componentes y routing si es necesario)
+        * `dashboard/`
+            * `dashboard-page/dashboard-page.component.ts/.html/.scss`
+            * `dashboard-routing.module.ts`
+            * `dashboard.module.ts`
+        * `properties/`
+            * `property-list-page/property-list-page.component.ts/.html/.scss`
+            * `property-reports-page/property-reports-page.component.ts/.html/.scss`
+            * `properties-routing.module.ts`
+            * `properties.module.ts`
+        * `clients/`
+        * `schedule/`
+        * `reports/` (Reportes generales)
+        * `settings/`
+    * `auth/` (Módulo de autenticación)
+        * `login-page/login-page.component.ts/.html/.scss`
+        * `auth-routing.module.ts`
+        * `auth.module.ts`
+    * `shared/`
+        * `components/` (Componentes UI reutilizables, ej: `message-box.component.ts`)
+        * `pipes/`
+        * `directives/`
+        * `models/` (Modelos compartidos si aplica)
+        * `shared.module.ts`
+    * `app-routing.module.ts`
+    * `app.component.ts/.html/.scss` (Componente raíz, usualmente solo contiene `<router-outlet>`)
+    * `app.module.ts`
+* `src/assets/` (Para imágenes estáticas, fuentes, etc.)
+* `src/environments/`
+* `tailwind.config.js`
+* `angular.json`
+
+**Componentes y Funcionalidades Clave a Replicar:**
+
+1.  **Servicio `RealEstateService` (`real-estate.service.ts`):**
+    * Debe tener un método `getFeatures()` que devuelva una estructura de datos similar a la del `theme` de React (array de objetos `feature`, con `id`, `name`, `icon` (representación del icono), `path`, `canAdd`, `isHomePageCandidate`, `isFavorite`, y `subItems`).
+    * Los iconos deben ser manejados de forma que se puedan renderizar en las plantillas de Angular (ej. nombres de clase para una fuente de iconos, o paths de SVG).
+
+2.  **Componente `PanelLayoutComponent` (`panel-layout.component.ts`):**
+    * Este será el componente principal para las rutas protegidas del panel.
+    * Contendrá al `HeaderComponent` y `SidebarComponent`.
+    * Manejará la lógica principal del estado del layout, similar a como lo hacía `App.js` o el `PanelLayout` de React:
+        * Obtención de `features` desde `RealEstateService` al inicializar.
+        * Estado para `defaultHomePage`, `openSubmenus`, `isSidebarOpen`, `isFavoritesOpen`, `activeCollapsedPanel`, `isSidebarPinned`, `sidebarPinnedStateOpen`.
+        * Lógica para `favoriteItems` y `canClearFavorites`.
+        * Métodos para: `handleNavigate` (usando Angular Router), `handleSearch`, `toggleSubmenu`, `handleAddItem`, `toggleSidebar`, `toggleSidebarPin`, `handleToggleFavorite`, `toggleFavoritesCollapse`, `toggleActiveCollapsedPanel`, `handleUnfavoriteAll`, `handleSetDefaultHomePage`.
+        * Utilizar `LayoutService` y `LocalStorageService` para gestionar y persistir estados relevantes.
+        * Observar la ruta actual usando el `Router` de Angular para actualizar `currentPage` y la lógica dependiente (ej. abrir submenús automáticamente).
+
+3.  **Componente `SidebarComponent` (`sidebar.component.ts`):**
+    * **Entradas (`@Input()`):** `features`, `defaultHomePage`, `currentPage`, `openSubmenus`, `isSidebarOpen`, `isFavoritesOpen`, `activeCollapsedPanel`, `isSidebarPinned`, `favoriteItems`, `canClearFavorites`.
+    * **Salidas (`@Output()`):** Eventos para `onNavigate`, `toggleSubmenu`, `onAddItem`, `onToggleFavorite`, `toggleFavoritesCollapse`, `onToggleSidebar`, `onSetDefaultHomePage`, `onToggleActiveCollapsedPanel`, `onToggleSidebarPin`, `onUnfavoriteAll`.
+    * Renderizará `SidebarHeaderComponent`, `SidebarFavoritesComponent`, y una lista de `SidebarNavItemComponent`.
+    * Debe ser responsivo: colapsar a `w-24` y mostrar solo iconos en pantallas pequeñas o cuando esté colapsado, y expandirse a `w-72` con texto completo.
+    * Manejar la lógica de "click outside" para los paneles flotantes del modo colapsado (referencia `collapsedPanelRef`).
+
+4.  **`SidebarHeaderComponent`:**
+    * **Entradas:** `isSidebarOpen`, `defaultHomePage`, `isSidebarPinned`.
+    * **Salidas:** `onNavigate` (al logo/nombre), `onToggleSidebarPin`, `onToggleSidebar`.
+    * Mostrar logo/nombre de la agencia, botón de fijar/desfijar sidebar, botón de colapsar/expandir sidebar.
+
+5.  **`SidebarFavoritesComponent`:**
+    * **Entradas:** `isSidebarOpen`, `favoriteItems`, `isFavoritesOpen`, `canClearFavorites`, `defaultHomePage`, `currentPage` (para `isSubItemActive`), `activeCollapsedPanel`.
+    * **Salidas:** `toggleFavoritesCollapse`, `onUnfavoriteAll`, `onNavigate`, `onToggleFavorite`, `onToggleActiveCollapsedPanel`.
+    * Mostrar sección de favoritos, expandible/colapsable.
+    * En modo colapsado del sidebar, mostrar un ícono de estrella y un panel flotante al hacer clic.
+    * Botón para resetear favoritos.
+
+6.  **`SidebarNavItemComponent` y `SidebarSubNavItemComponent`:**
+    * Replicar la lógica de visualización y acciones de los ítems de navegación del `theme` de React.
+    * **Entradas:** Datos del ítem/subítem, estado actual de la app (`currentPage`, `defaultHomePage`, `isSidebarOpen`, `openSubmenus`, `activeCollapsedPanel`).
+    * **Salidas:** Eventos para `onNavigate`, `toggleSubmenu` (para `NavItem`), `onSetDefaultHomePage`, `onToggleFavorite`, `onAddItem` (para `NavItem`), `onToggleActiveCollapsedPanel`.
+    * Mostrar ícono, nombre.
+    * Botones contextuales (visibles al hacer hover en modo expandido) para: marcar como página de inicio, agregar/quitar de favoritos.
+    * Botón para "Agregar nuevo" si `canAdd` es true.
+    * Indicador de submenú (flecha derecha/abajo).
+    * En modo colapsado del sidebar, el `SidebarNavItemComponent` mostrará solo el ícono principal y pequeños indicadores/botones para acciones rápidas o para abrir el panel de submenús.
+
+7.  **Componente `HeaderComponent` (`header.component.ts`):**
+    * **Entradas:** `isSidebarOpen`, `isSidebarPinned`.
+    * **Salidas:** `onToggleSidebar`, `onSearch`.
+    * Botón para mostrar/ocultar el sidebar (hamburguesa/X).
+    * Título de la página (podría obtenerse del `NavigationEnd` event del Router o un servicio).
+    * Componente `SearchComponentHeader`.
+    * Iconos de notificaciones y perfil de usuario (funcionalidad básica de display por ahora).
+
+8.  **`SearchComponentHeader`:**
+    * **Salida:** `onSearch` (emite el término de búsqueda).
+    * Input de búsqueda con ícono.
+
+9.  **Routing (`app-routing.module.ts` y módulos de features):**
+    * Ruta para `/login` (fuera del `PanelLayoutComponent`).
+    * Rutas hijas bajo un path base (ej. `/panel`) que usen `PanelLayoutComponent` como layout.
+        * `/panel/dashboard`
+        * `/panel/properties/list`
+        * `/panel/properties/reports`
+        * etc.
+    * Implementar un `AuthGuard` para proteger las rutas del panel.
+
+10. **Estilizado con Tailwind CSS:**
+    * Configurar Tailwind CSS en el proyecto Angular.
+    * Replicar los estilos visuales del tema de React usando clases de Tailwind.
+    * Asegurar responsividad similar al tema original.
+
+11. **Iconos:**
+    * Integrar Lucide Icons. Si no hay una librería Angular directa y madura para Lucide, usar los SVGs de Lucide directamente o una librería como `angular-feather` y mapear los iconos.
+
+12. **Manejo de Estado y Lógica:**
+    * Priorizar el uso de servicios de Angular con RxJS (BehaviorSubjects) para manejar estados compartidos (ej. `LayoutService`).
+    * Usar `@Input()` y `@Output()` para la comunicación entre componentes padres e hijos.
+    * La persistencia de datos (home page, sidebar pinned) se hará con `LocalStorageService`.
+    * Evitar el uso de `window.alert()`, reemplazándolo con un componente de notificación/mensaje (`MessageBoxComponent` en `shared/components/`) gestionado a través de `AlertService`.
+
+**Puntos Adicionales a Considerar:**
+
+* **Tipado Fuerte:** Usar TypeScript consistentemente para modelos de datos y tipos de propiedades.
+* **Manejo de Errores:** Implementar un manejo básico de errores para llamadas a servicios.
+* **Pruebas:** Mencionar la importancia de las pruebas unitarias (Karma/Jasmine) y e2e (Protractor/Cypress/Playwright).
+* **Comentarios en el Código:** Generar código bien comentado.
+
+**Ejemplo de Interacción (Sidebar Colapsado con Panel Flotante):**
+Cuando el sidebar está colapsado (`isSidebarOpen` es `false`):
+* Los `SidebarNavItemComponent` que tienen subítems, al hacerles clic, deben usar `LayoutService` (o emitir un evento) para establecer `activeCollapsedPanel` con el ID del feature y el tipo 'feature'.
+* `SidebarFavoritesComponent`, al hacer clic en su ícono, establece `activeCollapsedPanel` con el tipo 'favorites'.
+* El `SidebarComponent` (o `PanelLayoutComponent`) renderizará condicionalmente el panel flotante (`div` posicionado absolutamente) basado en `activeCollapsedPanel`.
+* El panel flotante contendrá la lista de subítems o favoritos.
+* Un clic fuera del panel flotante (manejado en `PanelLayoutComponent` usando una directiva o lógica en el componente) debe cerrar el panel (establecer `activeCollapsedPanel` a `null`).
+
+Este prompt debería proporcionar una guía completa para que una IA genere una base sólida para tu aplicación Angular.
