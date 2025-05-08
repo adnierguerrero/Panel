@@ -182,22 +182,28 @@
       background: none;
       border: none;
       padding: 0;
-      width: 20px;
-      height: 20px;
-      margin-left: 8px;
-      opacity: 0.6;
+      width: 24px;
+      height: 24px;
+      margin-left: 6px;
+      opacity: 0.8;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity var(--transition-speed);
-      color: white;
+      transition: all 0.2s ease;
+      color: rgba(255, 255, 255, 0.8);
       border-radius: 50%;
     }
     
     .clear-favorites-btn:hover {
       opacity: 1;
+      transform: rotate(180deg);
       background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .clear-favorites-btn svg {
+      width: 16px;
+      height: 16px;
     }
     
     .sidebar.collapsed .clear-favorites-btn {
@@ -498,9 +504,12 @@
         <div class="section-header">
           <span class="section-title">Favorites</span>
           <span class="badge">1</span>
-          <button id="clear-favorites" class="clear-favorites-btn" title="Clear all favorites">
+          <button id="clear-favorites" class="clear-favorites-btn" title="Refresh favorites">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 12H5"></path>
+              <path d="M23 4v6h-6"></path>
+              <path d="M1 20v-6h6"></path>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+              <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
             </svg>
           </button>
           <span class="toggle-icon">
