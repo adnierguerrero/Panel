@@ -191,6 +191,15 @@
     
     .favorites-list {
       list-style-type: none;
+      transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+      max-height: 500px;
+      overflow: hidden;
+      opacity: 1;
+    }
+    
+    .favorites-list.collapsed {
+      max-height: 0;
+      opacity: 0;
     }
     
     /* Navigation Items */
@@ -826,6 +835,7 @@
         const pinSidebarBtn = document.getElementById('pin-sidebar');
         const collapseSidebarBtn = document.getElementById('collapse-sidebar');
         const toggleIcon = document.querySelector('.toggle-icon svg');
+        const favoritesList = document.querySelector('.favorites-list');
         
         // Update sidebar expanded/collapsed state
         if (this.isSidebarOpen) {
@@ -872,14 +882,13 @@
         }
         
         // Update favorites section expanded/collapsed
-        const favoritesContent = document.querySelector('.favorites-list');
         if (this.isFavoritesOpen) {
-          favoritesContent.style.maxHeight = '500px';
+          favoritesList.classList.remove('collapsed');
           toggleIcon.innerHTML = `
             <path d="m18 15-6-6-6 6"></path>
           `;
         } else {
-          favoritesContent.style.maxHeight = '0';
+          favoritesList.classList.add('collapsed');
           toggleIcon.innerHTML = `
             <path d="m6 9 6 6 6-6"></path>
           `;
