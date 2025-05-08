@@ -309,6 +309,61 @@
       opacity: 0;
     }
     
+    /* Add button for parent items */
+    .add-button {
+      margin-left: 6px;
+      margin-right: 6px;
+      opacity: 0.7;
+      transition: opacity var(--transition-speed);
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .add-button:hover {
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar.collapsed .add-button {
+      opacity: 0;
+    }
+    
+    /* Submenu Styles */
+    .submenu {
+      padding-left: 32px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      opacity: 0;
+    }
+    
+    .submenu.active {
+      max-height: 500px;
+      opacity: 1;
+    }
+    
+    .parent-item .nav-icon + .nav-text::after {
+      content: '';
+      display: inline-block;
+      margin-left: 6px;
+      width: 12px;
+      height: 12px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.7;
+      transition: transform 0.2s;
+    }
+    
+    .parent-item.expanded .nav-icon + .nav-text::after {
+      transform: rotate(180deg);
+    }
+    
     /* Main Content Area */
     .main-content {
       flex: 1;
@@ -557,7 +612,7 @@
               </svg>
             </span>
           </li>
-          <li class="nav-item">
+          <li class="nav-item parent-item" data-parent="properties">
             <div class="nav-icon">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -565,13 +620,63 @@
               </svg>
             </div>
             <span class="nav-text">Properties</span>
+            <span class="add-button" title="Add new property">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </span>
             <span class="favorite-icon">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
             </span>
           </li>
-          <li class="nav-item">
+          <ul class="submenu" id="properties-submenu">
+            <li class="nav-item">
+              <div class="nav-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                </svg>
+              </div>
+              <span class="nav-text">All Properties</span>
+              <span class="favorite-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </span>
+            </li>
+            <li class="nav-item">
+              <div class="nav-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+              </div>
+              <span class="nav-text">For Sale</span>
+              <span class="favorite-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </span>
+            </li>
+            <li class="nav-item">
+              <div class="nav-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </div>
+              <span class="nav-text">For Rent</span>
+              <span class="favorite-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </span>
+            </li>
+          </ul>
+          
+          <li class="nav-item parent-item" data-parent="clients">
             <div class="nav-icon">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -581,12 +686,62 @@
               </svg>
             </div>
             <span class="nav-text">Clients</span>
+            <span class="add-button" title="Add new client">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </span>
             <span class="favorite-icon">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
             </span>
           </li>
+          <ul class="submenu" id="clients-submenu">
+            <li class="nav-item">
+              <div class="nav-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <span class="nav-text">All Clients</span>
+              <span class="favorite-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </span>
+            </li>
+            <li class="nav-item">
+              <div class="nav-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <span class="nav-text">Buyers</span>
+              <span class="favorite-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </span>
+            </li>
+            <li class="nav-item">
+              <div class="nav-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <span class="nav-text">Sellers</span>
+              <span class="favorite-icon">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </span>
+            </li>
+          </ul>
           <li class="nav-item">
             <div class="nav-icon">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -725,6 +880,36 @@
         this.isSidebarOpen = !this.isSidebarOpen;
         localStorage.setItem(this.sidebarOpenStateKey, this.isSidebarOpen);
         this.updateUI();
+      },
+      
+      // Toggle submenu expanded/collapsed
+      toggleSubmenu(parentId) {
+        const parentItem = document.querySelector(`.parent-item[data-parent="${parentId}"]`);
+        const submenu = document.getElementById(`${parentId}-submenu`);
+        
+        if (parentItem && submenu) {
+          const isExpanded = parentItem.classList.contains('expanded');
+          
+          if (isExpanded) {
+            parentItem.classList.remove('expanded');
+            submenu.classList.remove('active');
+          } else {
+            parentItem.classList.add('expanded');
+            submenu.classList.add('active');
+          }
+          
+          // Store state in localStorage
+          const openSubmenus = JSON.parse(localStorage.getItem('open-submenus') || '[]');
+          const index = openSubmenus.indexOf(parentId);
+          
+          if (isExpanded && index !== -1) {
+            openSubmenus.splice(index, 1);
+          } else if (!isExpanded && index === -1) {
+            openSubmenus.push(parentId);
+          }
+          
+          localStorage.setItem('open-submenus', JSON.stringify(openSubmenus));
+        }
       },
       
       // Toggle sidebar pin state
@@ -995,10 +1180,42 @@
       // Make nav items clickable
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach(item => {
-        item.addEventListener('click', function() {
-          const navText = this.querySelector('.nav-text').textContent;
-          alert('Navegando a: ' + navText);
+        // If it's a parent item with submenu
+        if (item.classList.contains('parent-item')) {
+          item.addEventListener('click', function() {
+            const parentId = this.dataset.parent;
+            AppState.toggleSubmenu(parentId);
+          });
+        } else {
+          // Regular navigation item
+          item.addEventListener('click', function() {
+            const navText = this.querySelector('.nav-text').textContent;
+            alert('Navegando a: ' + navText);
+          });
+        }
+      });
+      
+      // Set up add buttons
+      const addButtons = document.querySelectorAll('.add-button');
+      addButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.stopPropagation(); // Prevent parent item click (which would toggle submenu)
+          const parentItem = this.closest('.parent-item');
+          const parentText = parentItem.querySelector('.nav-text').textContent;
+          alert(`Añadiendo nuevo elemento a: ${parentText}`);
         });
+      });
+      
+      // Initialize submenus from localStorage
+      const openSubmenus = JSON.parse(localStorage.getItem('open-submenus') || '[]');
+      openSubmenus.forEach(parentId => {
+        const parentItem = document.querySelector(`.parent-item[data-parent="${parentId}"]`);
+        const submenu = document.getElementById(`${parentId}-submenu`);
+        
+        if (parentItem && submenu) {
+          parentItem.classList.add('expanded');
+          submenu.classList.add('active');
+        }
       });
       
       // Set up clear all favorites button in the header
