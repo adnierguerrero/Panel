@@ -627,6 +627,10 @@
       const toggleSidebarBtn = document.getElementById('toggle-sidebar');
       const collapseSidebarBtn = document.getElementById('collapse-sidebar');
       const pinSidebarBtn = document.getElementById('pin-sidebar');
+      const favoriteSection = document.querySelector('.favorites-section');
+      const favoritesList = document.querySelector('.favorites-list');
+      const favoriteIcons = document.querySelectorAll('.favorite-icon');
+      const favoriteBadge = document.querySelector('.favorites-section .badge');
       
       // Toggle sidebar collapse
       collapseSidebarBtn.addEventListener('click', function() {
@@ -641,6 +645,117 @@
       // Sidebar pin functionality would normally toggle a persistent state
       pinSidebarBtn.addEventListener('click', function() {
         alert('En una implementación completa, este botón fijaría la barra lateral para que permanezca abierta o colapsada según las preferencias del usuario.');
+      });
+      
+      // Set up favorites functionality
+      favoriteIcons.forEach(icon => {
+        icon.addEventListener('click', function(e) {
+          e.stopPropagation(); // Prevent navigation item click
+          
+          const navItem = this.closest('.nav-item');
+          const isActive = this.classList.contains('active');
+          const itemText = navItem.querySelector('.nav-text').textContent;
+          const itemIcon = navItem.querySelector('.nav-icon').innerHTML;
+          
+          // Toggle favorite status
+          if (isActive) {
+            this.classList.remove('active');
+            this.innerHTML = `
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            `;
+            
+            // Remove from favorites list
+            const favoriteItems = favoritesList.querySelectorAll('li');
+            favoriteItems.forEach(item => {
+              if(item.querySelector('.nav-text').textContent === itemText) {
+                item.remove();
+              }
+            });
+          } else {
+            this.classList.add('active');
+            this.innerHTML = `
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            `;
+            
+            // Add to favorites list if not already there
+            const favoriteItems = favoritesList.querySelectorAll('li');
+            let exists = false;
+            
+            favoriteItems.forEach(item => {
+              if(item.querySelector('.nav-text').textContent === itemText) {
+                exists = true;
+              }
+            });
+            
+            if(!exists) {
+              const newFavorite = document.createElement('li');
+              newFavorite.className = 'nav-item';
+              newFavorite.innerHTML = `
+                <div class="nav-icon">
+                  ${itemIcon}
+                </div>
+                <span class="nav-text">${itemText}</span>
+                <span class="favorite-icon active">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </span>
+              `;
+              
+              // Add click handler to the new favorite item
+              newFavorite.addEventListener('click', function() {
+                alert('Navegando a: ' + itemText);
+              });
+              
+              // Add click handler to the favorite icon in the new item
+              const newFavoriteIcon = newFavorite.querySelector('.favorite-icon');
+              newFavoriteIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // Find and update the original nav item
+                const navItems = document.querySelectorAll('.nav-section .nav-item');
+                navItems.forEach(item => {
+                  if(item.querySelector('.nav-text').textContent === itemText) {
+                    item.querySelector('.favorite-icon').click();
+                  }
+                });
+              });
+              
+              favoritesList.appendChild(newFavorite);
+            }
+          }
+          
+          // Update favorites count
+          const favCount = favoritesList.querySelectorAll('li').length;
+          favoriteBadge.textContent = favCount;
+          
+          // Show/hide favorites section based on count
+          if(favCount === 0) {
+            favoriteSection.style.display = 'none';
+          } else {
+            favoriteSection.style.display = 'block';
+          }
+        });
+      });
+      
+      // Initialize favorites section visibility
+      const initialFavCount = favoritesList.querySelectorAll('li').length;
+      favoriteBadge.textContent = initialFavCount;
+      if(initialFavCount === 0) {
+        favoriteSection.style.display = 'none';
+      }
+      
+      // Make nav items clickable
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', function() {
+          const navText = this.querySelector('.nav-text').textContent;
+          alert('Navegando a: ' + navText);
+        });
       });
     });
   </script>
