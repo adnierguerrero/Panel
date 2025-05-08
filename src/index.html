@@ -17,12 +17,15 @@
       --sidebar-collapsed-width: 72px;
       --primary-color: #0369a1;
       --primary-hover: #0284c7;
+      --primary-dark: #075985;
       --light-bg: #f1f5f9;
       --card-bg: #ffffff;
       --text-color: #334155;
       --text-light: #64748b;
       --header-height: 60px;
       --transition-speed: 0.3s;
+      --star-active: #f59e0b;
+      --border-color: rgba(255, 255, 255, 0.1);
     }
     
     * {
@@ -116,11 +119,24 @@
       align-items: center;
       justify-content: center;
       border-radius: 6px;
+      transition: background-color 0.2s, opacity 0.2s;
     }
     
     .action-button:hover {
       opacity: 1;
       background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .action-button.active {
+      color: var(--star-active);
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .action-button:disabled, 
+    .action-button.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     
     /* Favorites Section */
@@ -245,7 +261,7 @@
     
     .favorite-icon.active {
       opacity: 1;
-      color: #fbbf24;
+      color: var(--star-active);
     }
     
     .sidebar.collapsed .favorite-icon {
@@ -621,133 +637,311 @@
   </div>
   
   <script>
-    // Add interactivity to the sidebar
+    // State management - simulate React-like state
+    const AppState = {
+      isSidebarOpen: true,
+      isSidebarPinned: false,
+      isFavoritesOpen: true,
+      defaultHomePage: '/dashboard',
+      features: [], // Will store navigation features
+      favoriteItems: [], // Will store favorite items
+      sidebarPinnedStateKey: 'sidebar-pinned',
+      sidebarOpenStateKey: 'sidebar-open',
+      favoritesOpenStateKey: 'favorites-open',
+      defaultHomePageKey: 'default-home-page',
+      
+      // Load persisted state from localStorage
+      init() {
+        // Check if we have values in localStorage
+        const pinnedState = localStorage.getItem(this.sidebarPinnedStateKey);
+        const openState = localStorage.getItem(this.sidebarOpenStateKey);
+        const favState = localStorage.getItem(this.favoritesOpenStateKey);
+        const homePage = localStorage.getItem(this.defaultHomePageKey);
+        
+        // Apply persisted values or use defaults
+        this.isSidebarPinned = pinnedState === 'true';
+        this.isSidebarOpen = openState !== null ? openState === 'true' : true;
+        this.isFavoritesOpen = favState !== null ? favState === 'true' : true;
+        this.defaultHomePage = homePage || '/dashboard';
+        
+        // Apply initial UI state
+        this.updateUI();
+      },
+      
+      // Toggle sidebar open/closed state
+      toggleSidebar() {
+        // If sidebar is pinned, don't allow toggling
+        if (this.isSidebarPinned) return;
+        
+        this.isSidebarOpen = !this.isSidebarOpen;
+        localStorage.setItem(this.sidebarOpenStateKey, this.isSidebarOpen);
+        this.updateUI();
+      },
+      
+      // Toggle sidebar pin state
+      toggleSidebarPin() {
+        this.isSidebarPinned = !this.isSidebarPinned;
+        localStorage.setItem(this.sidebarPinnedStateKey, this.isSidebarPinned);
+        this.updateUI();
+      },
+      
+      // Toggle favorites section expanded/collapsed
+      toggleFavoritesSection() {
+        this.isFavoritesOpen = !this.isFavoritesOpen;
+        localStorage.setItem(this.favoritesOpenStateKey, this.isFavoritesOpen);
+        this.updateUI();
+      },
+      
+      // Toggle favorite status for a menu item
+      toggleFavorite(itemElement) {
+        const navItem = itemElement.closest('.nav-item');
+        const isActive = itemElement.classList.contains('active');
+        const itemText = navItem.querySelector('.nav-text').textContent;
+        const itemIcon = navItem.querySelector('.nav-icon').innerHTML;
+        
+        if (isActive) {
+          // Unfavorite
+          itemElement.classList.remove('active');
+          itemElement.innerHTML = `
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          `;
+          
+          // Remove from favorites list
+          this.removeFavorite(itemText);
+        } else {
+          // Favorite
+          itemElement.classList.add('active');
+          itemElement.innerHTML = `
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          `;
+          
+          // Add to favorites
+          this.addFavorite(itemText, itemIcon, navItem);
+        }
+        
+        this.updateFavoritesList();
+      },
+      
+      // Add an item to favorites
+      addFavorite(itemText, itemIcon, sourceItem) {
+        const favoritesList = document.querySelector('.favorites-list');
+        const favoriteItems = favoritesList.querySelectorAll('li');
+        let exists = false;
+        
+        // Check if it's already in favorites
+        favoriteItems.forEach(item => {
+          if(item.querySelector('.nav-text').textContent === itemText) {
+            exists = true;
+          }
+        });
+        
+        if(!exists) {
+          const newFavorite = document.createElement('li');
+          newFavorite.className = 'nav-item';
+          newFavorite.dataset.itemName = itemText;
+          newFavorite.innerHTML = `
+            <div class="nav-icon">
+              ${itemIcon}
+            </div>
+            <span class="nav-text">${itemText}</span>
+            <span class="favorite-icon active">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </span>
+          `;
+          
+          // Add click handler to the new favorite item
+          newFavorite.addEventListener('click', function() {
+            const navText = this.querySelector('.nav-text').textContent;
+            alert(`Navegando a: ${navText}`);
+          });
+          
+          // Add click handler to the favorite icon in the new item
+          const newFavoriteIcon = newFavorite.querySelector('.favorite-icon');
+          newFavoriteIcon.addEventListener('click', e => {
+            e.stopPropagation();
+            
+            // Find and update the original nav item
+            document.querySelectorAll('.nav-section .nav-item').forEach(item => {
+              if(item.querySelector('.nav-text').textContent === itemText) {
+                const favIcon = item.querySelector('.favorite-icon');
+                this.toggleFavorite(favIcon);
+              }
+            });
+          });
+          
+          favoritesList.appendChild(newFavorite);
+        }
+      },
+      
+      // Remove an item from favorites
+      removeFavorite(itemText) {
+        const favoritesList = document.querySelector('.favorites-list');
+        const favoriteItems = favoritesList.querySelectorAll('li');
+        
+        favoriteItems.forEach(item => {
+          if(item.querySelector('.nav-text').textContent === itemText) {
+            item.remove();
+          }
+        });
+      },
+      
+      // Clear all favorites
+      clearAllFavorites() {
+        const navItems = document.querySelectorAll('.nav-section .nav-item');
+        navItems.forEach(item => {
+          const favIcon = item.querySelector('.favorite-icon');
+          if (favIcon.classList.contains('active')) {
+            this.toggleFavorite(favIcon);
+          }
+        });
+      },
+      
+      // Update favorites list UI
+      updateFavoritesList() {
+        const favoritesSection = document.querySelector('.favorites-section');
+        const favoritesList = document.querySelector('.favorites-list');
+        const favoriteBadge = document.querySelector('.favorites-section .badge');
+        
+        // Update favorites count
+        const favCount = favoritesList.querySelectorAll('li').length;
+        favoriteBadge.textContent = favCount;
+        
+        // Show/hide favorites section based on count
+        if(favCount === 0) {
+          favoritesSection.style.display = 'none';
+        } else {
+          favoritesSection.style.display = 'block';
+        }
+      },
+      
+      // Update the entire UI based on current state
+      updateUI() {
+        const sidebar = document.getElementById('sidebar');
+        const pinSidebarBtn = document.getElementById('pin-sidebar');
+        const collapseSidebarBtn = document.getElementById('collapse-sidebar');
+        const toggleIcon = document.querySelector('.toggle-icon svg');
+        
+        // Update sidebar expanded/collapsed state
+        if (this.isSidebarOpen) {
+          sidebar.classList.remove('collapsed');
+        } else {
+          sidebar.classList.add('collapsed');
+        }
+        
+        // Update pinned state in UI
+        if (this.isSidebarPinned) {
+          pinSidebarBtn.innerHTML = `
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 17v5"></path>
+              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6"></path>
+              <path d="M12 6V3"></path>
+              <path d="M8 6h8"></path>
+            </svg>
+          `;
+          pinSidebarBtn.classList.add('active');
+          
+          // Disable collapse button if pinned
+          collapseSidebarBtn.style.opacity = '0.5';
+          collapseSidebarBtn.style.cursor = 'not-allowed';
+        } else {
+          pinSidebarBtn.innerHTML = `
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m15 11-7 7"></path>
+              <path d="m9 9 7 7"></path>
+              <path d="M15 5V3"></path>
+              <path d="M9 5V3"></path>
+              <path d="M15 21v-2"></path>
+              <path d="M9 21v-2"></path>
+              <path d="M3 15h2"></path>
+              <path d="M3 9h2"></path>
+              <path d="M21 15h-2"></path>
+              <path d="M21 9h-2"></path>
+            </svg>
+          `;
+          pinSidebarBtn.classList.remove('active');
+          
+          // Enable collapse button if not pinned
+          collapseSidebarBtn.style.opacity = '1';
+          collapseSidebarBtn.style.cursor = 'pointer';
+        }
+        
+        // Update favorites section expanded/collapsed
+        const favoritesContent = document.querySelector('.favorites-list');
+        if (this.isFavoritesOpen) {
+          favoritesContent.style.maxHeight = '500px';
+          toggleIcon.innerHTML = `
+            <path d="m18 15-6-6-6 6"></path>
+          `;
+        } else {
+          favoritesContent.style.maxHeight = '0';
+          toggleIcon.innerHTML = `
+            <path d="m6 9 6 6 6-6"></path>
+          `;
+        }
+      },
+      
+      // Set an item as the default home page
+      setDefaultHomePage(path) {
+        this.defaultHomePage = path;
+        localStorage.setItem(this.defaultHomePageKey, path);
+        
+        // Visual indication for current home page
+        // Implementation would be here
+      }
+    };
+    
+    // Initialize all interactivity on page load
     document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
       const sidebar = document.getElementById('sidebar');
       const toggleSidebarBtn = document.getElementById('toggle-sidebar');
       const collapseSidebarBtn = document.getElementById('collapse-sidebar');
       const pinSidebarBtn = document.getElementById('pin-sidebar');
       const favoriteSection = document.querySelector('.favorites-section');
+      const favoritesHeader = document.querySelector('.section-header');
       const favoritesList = document.querySelector('.favorites-list');
       const favoriteIcons = document.querySelectorAll('.favorite-icon');
       const favoriteBadge = document.querySelector('.favorites-section .badge');
       
-      // Toggle sidebar collapse
+      // Initialize app state
+      AppState.init();
+      
+      // Toggle sidebar collapse/expand
       collapseSidebarBtn.addEventListener('click', function() {
-        sidebar.classList.toggle('collapsed');
+        AppState.toggleSidebar();
       });
       
       // Toggle sidebar from the header
       toggleSidebarBtn.addEventListener('click', function() {
-        sidebar.classList.toggle('collapsed');
+        AppState.toggleSidebar();
       });
       
-      // Sidebar pin functionality would normally toggle a persistent state
+      // Toggle sidebar pin state
       pinSidebarBtn.addEventListener('click', function() {
-        alert('En una implementación completa, este botón fijaría la barra lateral para que permanezca abierta o colapsada según las preferencias del usuario.');
+        AppState.toggleSidebarPin();
+      });
+      
+      // Toggle favorites section
+      favoritesHeader.addEventListener('click', function() {
+        AppState.toggleFavoritesSection();
       });
       
       // Set up favorites functionality
       favoriteIcons.forEach(icon => {
         icon.addEventListener('click', function(e) {
           e.stopPropagation(); // Prevent navigation item click
-          
-          const navItem = this.closest('.nav-item');
-          const isActive = this.classList.contains('active');
-          const itemText = navItem.querySelector('.nav-text').textContent;
-          const itemIcon = navItem.querySelector('.nav-icon').innerHTML;
-          
-          // Toggle favorite status
-          if (isActive) {
-            this.classList.remove('active');
-            this.innerHTML = `
-              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-            `;
-            
-            // Remove from favorites list
-            const favoriteItems = favoritesList.querySelectorAll('li');
-            favoriteItems.forEach(item => {
-              if(item.querySelector('.nav-text').textContent === itemText) {
-                item.remove();
-              }
-            });
-          } else {
-            this.classList.add('active');
-            this.innerHTML = `
-              <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-            `;
-            
-            // Add to favorites list if not already there
-            const favoriteItems = favoritesList.querySelectorAll('li');
-            let exists = false;
-            
-            favoriteItems.forEach(item => {
-              if(item.querySelector('.nav-text').textContent === itemText) {
-                exists = true;
-              }
-            });
-            
-            if(!exists) {
-              const newFavorite = document.createElement('li');
-              newFavorite.className = 'nav-item';
-              newFavorite.innerHTML = `
-                <div class="nav-icon">
-                  ${itemIcon}
-                </div>
-                <span class="nav-text">${itemText}</span>
-                <span class="favorite-icon active">
-                  <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                </span>
-              `;
-              
-              // Add click handler to the new favorite item
-              newFavorite.addEventListener('click', function() {
-                alert('Navegando a: ' + itemText);
-              });
-              
-              // Add click handler to the favorite icon in the new item
-              const newFavoriteIcon = newFavorite.querySelector('.favorite-icon');
-              newFavoriteIcon.addEventListener('click', function(e) {
-                e.stopPropagation();
-                
-                // Find and update the original nav item
-                const navItems = document.querySelectorAll('.nav-section .nav-item');
-                navItems.forEach(item => {
-                  if(item.querySelector('.nav-text').textContent === itemText) {
-                    item.querySelector('.favorite-icon').click();
-                  }
-                });
-              });
-              
-              favoritesList.appendChild(newFavorite);
-            }
-          }
-          
-          // Update favorites count
-          const favCount = favoritesList.querySelectorAll('li').length;
-          favoriteBadge.textContent = favCount;
-          
-          // Show/hide favorites section based on count
-          if(favCount === 0) {
-            favoriteSection.style.display = 'none';
-          } else {
-            favoriteSection.style.display = 'block';
-          }
+          AppState.toggleFavorite(this);
         });
       });
       
-      // Initialize favorites section visibility
-      const initialFavCount = favoritesList.querySelectorAll('li').length;
-      favoriteBadge.textContent = initialFavCount;
-      if(initialFavCount === 0) {
-        favoriteSection.style.display = 'none';
-      }
+      // Initialize favorites UI
+      AppState.updateFavoritesList();
       
       // Make nav items clickable
       const navItems = document.querySelectorAll('.nav-item');
@@ -757,6 +951,19 @@
           alert('Navegando a: ' + navText);
         });
       });
+      
+      // Add function to reset all favorites
+      window.resetAllFavorites = function() {
+        AppState.clearAllFavorites();
+      };
+      
+      // Add action button to content area for testing
+      const contentCard = document.querySelector('.content-card');
+      const resetButton = document.createElement('button');
+      resetButton.textContent = 'Borrar todos los favoritos';
+      resetButton.className = 'px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 mt-3';
+      resetButton.addEventListener('click', () => window.resetAllFavorites());
+      contentCard.appendChild(resetButton);
     });
   </script>
 </body>
